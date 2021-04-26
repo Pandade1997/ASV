@@ -8,5 +8,5 @@ for x in train dev test; do
 done
 ## make test_pair for verification
 for x in dev test; do
-    python3 make_pairs.py $datadir/$x 1500 1500 || exit 1;
+    python3 make_pairs.py $datadir/$x 15 15 || exit 1;
 done

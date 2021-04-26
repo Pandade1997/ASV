@@ -44,19 +44,15 @@ def main():
                 feature_subdir = os.path.join(featdir, speaker)
                 if not os.path.exists(feature_subdir):
                     os.makedirs(feature_subdir)
-                for wav_file in os.listdir(wav_subdir):
-                    if wav_file[0] != '.':
-                        try:
-                            make_feature(os.path.join(wav_subdir, wav_file),
-                                         os.path.join(feature_subdir, wav_file).replace('.wav', '.npy'))
-                            num += 1
-                            utt_id = wav_file.replace('.wav', '')
-                            wav_scp_write.write(utt_id + ' ' + os.path.join(wav_subdir, wav_file) + '\n')
-                            utt2spk_write.write(utt_id + ' ' + speaker + '\n')
-                            feats_scp_write.write(
-                                utt_id + ' ' + os.path.join(feature_subdir, wav_file).replace('.wav', '.npy') + '\n')
-                        except:
-                            print(os.path.join(wav_subdir, wav_file), ' has error')
+                wav_file = str(splits[1]).split('/', )[-1]
+                make_feature(os.path.join(wav_subdir, wav_file),
+                             os.path.join(feature_subdir, wav_file).replace('.wav', '.npy'))
+                num += 1
+                utt_id = wav_file.replace('.wav', '')
+                wav_scp_write.write(utt_id + ' ' + os.path.join(wav_subdir, wav_file) + '\n')
+                utt2spk_write.write(utt_id + ' ' + speaker + '\n')
+                feats_scp_write.write(
+                    utt_id + ' ' + os.path.join(feature_subdir, wav_file).replace('.wav', '.npy') + '\n')
     print('finish, wav file is ', num)
     wav_scp_write.close()
     utt2spk_write.close()

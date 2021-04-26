@@ -12,12 +12,15 @@ import torch
 from torch import nn
 import time
 
+
 class Flatten(nn.Module):
     def forward(self, input):
         return input.view(input.size(0), -1)
 
+
 class SEModule(nn.Module):
     '''Squeeze and Excitation Module'''
+
     def __init__(self, channels, reduction):
         super(SEModule, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
@@ -36,15 +39,18 @@ class SEModule(nn.Module):
 
         return input * x
 
+
 class CAModule(nn.Module):
     '''Channel Attention Module'''
+
     def __init__(self, channels, reduction):
         super(CAModule, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.max_pool = nn.AdaptiveMaxPool2d(1)
-        self.shared_mlp = nn.Sequential(nn.Conv2d(channels, channels // reduction, kernel_size=1, padding=0, bias=False),
-                                        nn.ReLU(inplace=True),
-                                        nn.Conv2d(channels // reduction, channels, kernel_size=1, padding=0, bias=False))
+        self.shared_mlp = nn.Sequential(
+            nn.Conv2d(channels, channels // reduction, kernel_size=1, padding=0, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(channels // reduction, channels, kernel_size=1, padding=0, bias=False))
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -56,8 +62,10 @@ class CAModule(nn.Module):
 
         return input * x
 
+
 class SAModule(nn.Module):
     '''Spatial Attention Module'''
+
     def __init__(self):
         super(SAModule, self).__init__()
         self.conv = nn.Conv2d(2, 1, kernel_size=3, padding=1, bias=False)
@@ -72,8 +80,10 @@ class SAModule(nn.Module):
         x = self.sigmoid(x)
         return input * x
 
+
 class BottleNeck_IR(nn.Module):
     '''Improved Residual Bottlenecks'''
+
     def __init__(self, in_channel, out_channel, stride, dim_match):
         super(BottleNeck_IR, self).__init__()
         self.res_layer = nn.Sequential(nn.BatchNorm2d(in_channel),
@@ -99,8 +109,10 @@ class BottleNeck_IR(nn.Module):
 
         return shortcut + res
 
+
 class BottleNeck_IR_SE(nn.Module):
     '''Improved Residual Bottlenecks with Squeeze and Excitation Module'''
+
     def __init__(self, in_channel, out_channel, stride, dim_match):
         super(BottleNeck_IR_SE, self).__init__()
         self.res_layer = nn.Sequential(nn.BatchNorm2d(in_channel),
@@ -127,8 +139,10 @@ class BottleNeck_IR_SE(nn.Module):
 
         return shortcut + res
 
+
 class BottleNeck_IR_CAM(nn.Module):
     '''Improved Residual Bottlenecks with Channel Attention Module'''
+
     def __init__(self, in_channel, out_channel, stride, dim_match):
         super(BottleNeck_IR_CAM, self).__init__()
         self.res_layer = nn.Sequential(nn.BatchNorm2d(in_channel),
@@ -155,8 +169,10 @@ class BottleNeck_IR_CAM(nn.Module):
 
         return shortcut + res
 
+
 class BottleNeck_IR_SAM(nn.Module):
     '''Improved Residual Bottlenecks with Spatial Attention Module'''
+
     def __init__(self, in_channel, out_channel, stride, dim_match):
         super(BottleNeck_IR_SAM, self).__init__()
         self.res_layer = nn.Sequential(nn.BatchNorm2d(in_channel),
@@ -183,8 +199,10 @@ class BottleNeck_IR_SAM(nn.Module):
 
         return shortcut + res
 
+
 class BottleNeck_IR_CBAM(nn.Module):
     '''Improved Residual Bottleneck with Channel Attention Module and Spatial Attention Module'''
+
     def __init__(self, in_channel, out_channel, stride, dim_match):
         super(BottleNeck_IR_CBAM, self).__init__()
         self.res_layer = nn.Sequential(nn.BatchNorm2d(in_channel),
@@ -215,6 +233,8 @@ class BottleNeck_IR_CBAM(nn.Module):
 
 
 filter_list = [64, 64, 128, 256, 512]
+
+
 def get_layers(num_layers):
     if num_layers == 10:
         return [2, 2, 2, 2]
@@ -227,11 +247,13 @@ def get_layers(num_layers):
     elif num_layers == 152:
         return [3, 8, 36, 3]
 
+
 class CBAMResNet(nn.Module):
-    def __init__(self, num_layers, feature_dim=512, drop_ratio=0.4, mode='ir',filter_list=filter_list):
+    def __init__(self, num_layers, feature_dim=512, drop_ratio=0.4, mode='ir', filter_list=filter_list):
         super(CBAMResNet, self).__init__()
         assert num_layers in [10, 20, 50, 100, 152], 'num_layers should be 50, 100 or 152'
-        assert mode in ['ir', 'ir_se', 'ir_cam', 'ir_sam', 'ir_cbam'], 'mode should be ir, ir_se, ir_cam, ir_sam or ir_cbam'
+        assert mode in ['ir', 'ir_se', 'ir_cam', 'ir_sam',
+                        'ir_cbam'], 'mode should be ir, ir_se, ir_cam, ir_sam or ir_cbam'
         layers = get_layers(num_layers)
         if num_layers == 10:
             filter_list = [64, 64, 128, 256, 256]
@@ -268,7 +290,7 @@ class CBAMResNet(nn.Module):
             self.output_layer = nn.Sequential(nn.AdaptiveAvgPool2d((1, None)),
                                               nn.Dropout(drop_ratio),
                                               Flatten(),
-                                              nn.Linear(512 * 3, feature_dim),
+                                              nn.Linear(512, feature_dim),
                                               nn.BatchNorm1d(feature_dim))
 
         # weight initialization
@@ -298,6 +320,7 @@ class CBAMResNet(nn.Module):
         x = self.output_layer(x)
 
         return x
+
 
 if __name__ == '__main__':
     input = torch.Tensor(2, 3, 112, 112)

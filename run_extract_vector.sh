@@ -1,9 +1,9 @@
 #!/bin/bash
 works_dir=$(pwd)
-feats_scp=/data/HOME/bliu/workspace/speaker/data/vox/test/feats.scp_100
+feats_scp=/exdata/HOME/snie/code/v2_speaker_asvspoof/dataset_min/speaker/data/test/feats.scp
 expdir=exp/xvector/
 stage=1
-nj=4
+nj=3
 
 loss_type="class_softmax"
 margin_type="Softmax"

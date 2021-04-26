@@ -260,7 +260,7 @@ class BaseDataset(Dataset):
         in_feat = self.time_warp(in_feat, self.augment_w_para)     
         for _ in range(self.augment_f_num):
             f_mask_len = random.randint(0, self.augment_f_para)
-            f_mask_start = random.randint(0, raw_feat_size - f_mask_len)
+            f_mask_start = random.randint(0, abs(raw_feat_size - f_mask_len))
             in_feat[:, f_mask_start:f_mask_start + f_mask_len] = raw_mean[f_mask_start:f_mask_start + f_mask_len]     
         for _ in range(self.augment_t_num):            
             t_mask_len = random.randint(0, min(self.augment_t_para, int(self.augment_p_para * time_steps)))

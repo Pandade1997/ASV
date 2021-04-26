@@ -80,7 +80,7 @@ def create_output_dir(opt, log_path):
     return logger
 
 def check_grad(params, clip_th, ignore_th):
-    befgad = torch.nn.utils.clip_grad_norm_(params, clip_th)
+    befgad = torch.nn.utils.clip_grad_norm_(params, clip_th).cpu()
     return (not np.isfinite(befgad) or (befgad > ignore_th))
 
 class AverageMeter(object):
